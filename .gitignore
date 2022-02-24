@@ -1,5 +1,7 @@
 .vscode
 .history
+.idea
+
 data/*
 !data/example_*
 env.*.sh
