@@ -40,7 +40,8 @@ def parse_args():
     parser.add_argument('-refine', '--rosettadock-refinement',
                         help='Use the RosettaDock-based refinement to improve the prediction performance. '
                              'But it will cost much more time.', action="store_true", default=False)
-
+    parser.add_argument('-refineonly', '--rosettadock-refinement-only',
+                        help='Run refinement when frodock results have been generated', action="store_true", default=False)
     return parser.parse_args()
 
 def main():
@@ -56,6 +57,7 @@ def main():
     filepath_e3sdf_1 = args.input_e3_ligand_sdf1
     filepath_e3sdf_2 = args.input_e3_ligand_sdf2
     refine = args.rosettadock_refinement
+    refineonly = args.rosettadock_refinement_only
     lig_locate_num = 1
     filepath_frodock = filepath_out + '/frodock'
     if os.path.exists(filepath_out) == False:
@@ -73,8 +75,9 @@ def main():
     os.chdir(filepath_frodock) #working directory is in filepath_frodock
 
     #FRODOCK docking
-    fro.frodock(site)
-    fro.filter_frodock(cpu, lig_locate_num)
+    if not (refine and refineonly):
+        fro.frodock(site)
+        fro.filter_frodock(cpu, lig_locate_num)
 
     #Rosetta docking
     filepath_rosetta = 'rosetta'

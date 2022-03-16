@@ -55,7 +55,7 @@ def rosetta(cpu, lig_locate_num):
         old_rank = frodock_list[j].split()[1]
         pre.preprocess_pdb_element('%s/target_%s_addH.pdb'% (filepath_frodock, old_rank),
                                    'target_lig_pre.%s.pdb' % (new_rank))
-        pre.obabel_convert_format('pdb', 'target_lig_pre.%s.pdb' % (new_rank),
+        pre.schrodinger_convert_format('pdb', 'target_lig_pre.%s.pdb' % (new_rank),
                                   'sdf', 'target_lig_pre.%s.sdf' % (new_rank), addH=True)
         molfile_to_params('LG2', 'lig.%s' % new_rank, 'target_lig_pre.%s.sdf' % (new_rank))
         os.system('cp %s/cluster/model.%s.pdb .' % (filepath_frodock, new_rank))
@@ -86,8 +86,8 @@ def rosetta(cpu, lig_locate_num):
     filepath_rec_lig_1 = 'rec_lig_1'
     filepath_rec_lig_2 = 'rec_lig_2'
     if lig_locate_num > 1:
-        pre.obabel_convert_format('sdf', 'rec_lig_1.sdf', 'pdb', 'rec_lig_1.pdb')
-        pre.obabel_convert_format('sdf', 'rec_lig_2.sdf', 'pdb', 'rec_lig_2.pdb')
+        pre.schrodinger_convert_format('sdf', 'rec_lig_1.sdf', 'pdb', 'rec_lig_1.pdb')
+        pre.schrodinger_convert_format('sdf', 'rec_lig_2.sdf', 'pdb', 'rec_lig_2.pdb')
         if os.path.exists('%s/vina' % filepath_rec_lig_1) == False:
             os.makedirs('%s/vina' % filepath_rec_lig_1)
         if os.path.exists('%s/vina' % filepath_rec_lig_2) == False:
@@ -158,7 +158,7 @@ def rosetta(cpu, lig_locate_num):
            else:
                os.system('cp %s/protac_%s.mol2 %s/protac_%s.mol2' %
                          (filepath_frodock_cluster, model_pdb_id, filepath_cluster, score_rank))
-           pre.obabel_convert_format('mol2', '%s/protac_%s.mol2' % (filepath_cluster, score_rank),
+           pre.schrodinger_convert_format('mol2', '%s/protac_%s.mol2' % (filepath_cluster, score_rank),
                                      'pdb', '%s/protac_%s.pdb' % (filepath_cluster, score_rank))
            pre.alter_chain('%s/protac_%s.pdb' % (filepath_cluster, score_rank),
                            '%s/protac_%s.pdb' % (filepath_cluster, score_rank), 'X')
@@ -172,7 +172,7 @@ def rosetta(cpu, lig_locate_num):
                protac_best_num_1 = vina_dict_1['%s' % model_pdb_id]
                protac_best_mol2_1 = '%s/protac_%s_%s.mol2' % (filepath_rec_lig_1, model_pdb_id, protac_best_num_1)
                os.system('cp %s %s/protac_%s_1.mol2' % (protac_best_mol2_1, filepath_cluster, score_rank))
-               pre.obabel_convert_format('mol2', '%s/protac_%s_1.mol2' % (filepath_cluster, score_rank),
+               pre.schrodinger_convert_format('mol2', '%s/protac_%s_1.mol2' % (filepath_cluster, score_rank),
                                          'pdb', '%s/protac_%s_1.pdb' % (filepath_cluster, score_rank))
                pre.alter_chain('%s/protac_%s_1.pdb' % (filepath_cluster, score_rank),
                                '%s/protac_%s_1.pdb' % (filepath_cluster, score_rank), 'X')
@@ -183,7 +183,7 @@ def rosetta(cpu, lig_locate_num):
                protac_best_num_2 = vina_dict_2['%s' % model_pdb_id]
                protac_best_mol2_2 = '%s/protac_%s_%s.mol2' % (filepath_rec_lig_2, model_pdb_id, protac_best_num_2)
                os.system('cp %s %s/protac_%s_2.mol2' % (protac_best_mol2_2, filepath_cluster, score_rank))
-               pre.obabel_convert_format('mol2', '%s/protac_%s_2.mol2' % (filepath_cluster, score_rank),
+               pre.schrodinger_convert_format('mol2', '%s/protac_%s_2.mol2' % (filepath_cluster, score_rank),
                                          'pdb', '%s/protac_%s_2.pdb' % (filepath_cluster, score_rank))
                pre.alter_chain('%s/protac_%s_2.pdb' % (filepath_cluster, score_rank),
                                '%s/protac_%s_2.pdb' % (filepath_cluster, score_rank), 'Y')
@@ -405,7 +405,7 @@ class Filtering_queue:
                     target_lig_pdb = 'target_lig.%s.pdb' % pdb_num
                     target_lig_sdf = 'target_lig.%s.sdf' % pdb_num
                     os.system('grep HETATM model.%s.pdb > %s' % (pdb_num, target_lig_pdb))
-                    pre.obabel_convert_format('pdb', target_lig_pdb, 'sdf', target_lig_sdf)
+                    pre.schrodinger_convert_format('pdb', target_lig_pdb, 'sdf', target_lig_sdf)
                     protac_sdf = 'protac_%s.sdf' % pdb_num
                     num_confor = pre.getConformers('rec_lig.sdf', 'target_lig.sdf', 'protac.smi',
                                                    target_lig_sdf, protac_sdf)
@@ -413,7 +413,7 @@ class Filtering_queue:
                     if int(num_confor) > 0 :
                         #preprocess files for obenergy and vina
                         protac_mol2 = 'protac_%s.mol2' % (pdb_num)
-                        pre.obabel_convert_format('sdf', protac_sdf, 'mol2', protac_mol2)
+                        pre.schrodinger_convert_format('sdf', protac_sdf, 'mol2', protac_mol2)
                         model_nolig_pdb = 'model_nolig.%s.pdb' % (pdb_num)
                         model_pdb = 'model.%s.pdb' % pdb_num
                         os.system('grep ATOM %s > %s' % (model_pdb, model_nolig_pdb))
@@ -432,7 +432,7 @@ class Filtering_queue:
                     target_lig_sdf_1 = '%s/%s' % (self.filepath_rec_lig_1, target_lig_sdf)
                     os.system('cat %s rec_lig_1.pdb > %s'
                               % (target_lig_pdb, target_lig_pdb_1))
-                    pre.obabel_convert_format('pdb', target_lig_pdb_1, 'sdf', target_lig_sdf_1)
+                    pre.schrodinger_convert_format('pdb', target_lig_pdb_1, 'sdf', target_lig_sdf_1)
                     protac_sdf_1 = '%s/protac_%s.sdf' % (self.filepath_rec_lig_1, pdb_num)
                     num_confor_1 = pre.getConformers('rec_lig_1.sdf', 'target_lig.sdf', 'protac.smi',
                                                      target_lig_sdf_1, protac_sdf_1)
@@ -442,7 +442,7 @@ class Filtering_queue:
                     if int(num_confor_1) > 0 :
                         #preprocess files for obenergy and vina
                         protac_mol2_1 = '%s/protac_%s.mol2' % (self.filepath_rec_lig_1, pdb_num)
-                        pre.obabel_convert_format('sdf', protac_sdf_1, 'mol2', protac_mol2_1)
+                        pre.schrodinger_convert_format('sdf', protac_sdf_1, 'mol2', protac_mol2_1)
                         model_pdb = 'model.%s.pdb' % pdb_num
                         os.system('grep ATOM %s > %s' % (model_pdb, model_nolig_pdb))
                         #obenergy and vina
@@ -452,14 +452,14 @@ class Filtering_queue:
                     target_lig_sdf_2 = '%s/%s' % (self.filepath_rec_lig_2, target_lig_sdf)
                     os.system('cat %s rec_lig_2.pdb > %s'
                               % (target_lig_pdb, target_lig_pdb_2))
-                    pre.obabel_convert_format('pdb', target_lig_pdb_2, 'sdf', target_lig_sdf_2)
+                    pre.schrodinger_convert_format('pdb', target_lig_pdb_2, 'sdf', target_lig_sdf_2)
                     protac_sdf_2 = '%s/protac_%s.sdf' % (self.filepath_rec_lig_2, pdb_num)
                     num_confor_2 = pre.getConformers('rec_lig_2.sdf', 'target_lig.sdf', 'protac.smi',
                                                      target_lig_sdf_2, protac_sdf_2)
                     if int(num_confor_2) > 0 :
                         #preprocess files for obenergy and vina
                         protac_mol2_2 = '%s/protac_%s.mol2' % (self.filepath_rec_lig_2, pdb_num)
-                        pre.obabel_convert_format('sdf', protac_sdf_2, 'mol2', protac_mol2_2)
+                        pre.schrodinger_convert_format('sdf', protac_sdf_2, 'mol2', protac_mol2_2)
                         model_pdb = 'model.%s.pdb' % pdb_num
                         os.system('grep ATOM %s > %s' % (model_pdb, model_nolig_pdb))
                         #obenergy and vina

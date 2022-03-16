@@ -22,6 +22,7 @@ def frodock(site):
     else:
         print "frodockgrid is not found"
         sys.exit()
+        
     os.system('echo STAGE-1 Creation of receptor vdw potential map')
     os.system(frodockgrid + ' receptor.pdb -o receptor_W.ccp4')
 
@@ -80,12 +81,12 @@ def filter_frodock(cpu, lig_locate_num):
     #preprocess files
     pre.preprocess_pdb_element('receptor.pdb', 'rec_lig.pdb')
     pre.preprocess_pdb_element('target.pdb', 'target_lig.pdb')
-    pre.obabel_convert_format('pdb', 'rec_lig.pdb', 'sdf', 'rec_lig.sdf')
-    pre.obabel_convert_format('pdb', 'rec_lig.pdb', 'sdf', 'rec_lig_H.sdf', addH=True)
-    pre.obabel_convert_format('sdf', 'rec_lig_H.sdf', 'pdb', 'rec_lig_H.pdb')
-    pre.obabel_convert_format('pdb', 'target_lig.pdb', 'sdf', 'target_lig.sdf')
-    pre.obabel_convert_format('pdb', 'target_lig.pdb', 'sdf', 'target_lig_H.sdf', addH=True)
-    pre.obabel_convert_format('sdf', 'target_lig_H.sdf', 'pdb', 'target_lig_H.pdb')
+    pre.schrodinger_convert_format('pdb', 'rec_lig.pdb', 'sdf', 'rec_lig.sdf')
+    pre.schrodinger_convert_format('pdb', 'rec_lig.pdb', 'sdf', 'rec_lig_H.sdf', addH=True)
+    pre.schrodinger_convert_format('sdf', 'rec_lig_H.sdf', 'pdb', 'rec_lig_H.pdb')
+    pre.schrodinger_convert_format('pdb', 'target_lig.pdb', 'sdf', 'target_lig.sdf')
+    pre.schrodinger_convert_format('pdb', 'target_lig.pdb', 'sdf', 'target_lig_H.sdf', addH=True)
+    pre.schrodinger_convert_format('sdf', 'target_lig_H.sdf', 'pdb', 'target_lig_H.pdb')
     os.system(ADFRSUITE + '/bin/reduce -OH -HIS -NOADjust -NUClear receptor.pdb'
                        ' | grep ATOM 1> receptor_H.pdb 2>> addH_log')
     os.system(ADFRSUITE + '/bin/reduce -OH -HIS -NOADjust -NUClear target.pdb'
@@ -101,8 +102,8 @@ def filter_frodock(cpu, lig_locate_num):
     filepath_rec_lig_1 = 'rec_lig_1'
     filepath_rec_lig_2 = 'rec_lig_2'
     if lig_locate_num > 1:
-        pre.obabel_convert_format('sdf', 'rec_lig_1.sdf', 'pdb', 'rec_lig_1.pdb')
-        pre.obabel_convert_format('sdf', 'rec_lig_2.sdf', 'pdb', 'rec_lig_2.pdb')
+        pre.schrodinger_convert_format('sdf', 'rec_lig_1.sdf', 'pdb', 'rec_lig_1.pdb')
+        pre.schrodinger_convert_format('sdf', 'rec_lig_2.sdf', 'pdb', 'rec_lig_2.pdb')
         if os.path.exists('%s/vina' % filepath_rec_lig_1) == False:
             os.makedirs('%s/vina' % filepath_rec_lig_1)
         if os.path.exists('%s/vina' % filepath_rec_lig_2) == False:
@@ -164,7 +165,7 @@ def filter_frodock(cpu, lig_locate_num):
             protac_best_num = vina_dict['%s' % model_nolig_pdb_id]
             protac_best_mol2 = 'protac_%s_%s.mol2' % (model_nolig_pdb_id, protac_best_num)
             os.system('cp %s %s/protac_%s.mol2' % (protac_best_mol2, filepath_cluster, score_rank))
-            pre.obabel_convert_format('mol2', '%s/protac_%s.mol2' % (filepath_cluster, score_rank),
+            pre.schrodinger_convert_format('mol2', '%s/protac_%s.mol2' % (filepath_cluster, score_rank),
                                       'pdb', '%s/protac_%s.pdb' % (filepath_cluster, score_rank))
             pre.alter_chain('%s/protac_%s.pdb' % (filepath_cluster, score_rank),
                             '%s/protac_%s.pdb' % (filepath_cluster, score_rank), 'X')
@@ -177,7 +178,7 @@ def filter_frodock(cpu, lig_locate_num):
                 protac_best_num_1 = vina_dict_1['%s' % model_nolig_pdb_id]
                 protac_best_mol2_1 = '%s/protac_%s_%s.mol2' % (filepath_rec_lig_1, model_nolig_pdb_id, protac_best_num_1)
                 os.system('cp %s %s/protac_%s_1.mol2' % (protac_best_mol2_1, filepath_cluster, score_rank))
-                pre.obabel_convert_format('mol2', '%s/protac_%s_1.mol2' % (filepath_cluster, score_rank),
+                pre.schrodinger_convert_format('mol2', '%s/protac_%s_1.mol2' % (filepath_cluster, score_rank),
                                           'pdb', '%s/protac_%s_1.pdb' % (filepath_cluster, score_rank))
                 pre.alter_chain('%s/protac_%s_1.pdb' % (filepath_cluster, score_rank),
                                 '%s/protac_%s_1.pdb' % (filepath_cluster, score_rank), 'X')
@@ -187,7 +188,7 @@ def filter_frodock(cpu, lig_locate_num):
                 protac_best_num_2 = vina_dict_2['%s' % model_nolig_pdb_id]
                 protac_best_mol2_2 = '%s/protac_%s_%s.mol2' % (filepath_rec_lig_2, model_nolig_pdb_id, protac_best_num_2)
                 os.system('cp %s %s/protac_%s_2.mol2' % (protac_best_mol2_2, filepath_cluster, score_rank))
-                pre.obabel_convert_format('mol2', '%s/protac_%s_2.mol2' % (filepath_cluster, score_rank),
+                pre.schrodinger_convert_format('mol2', '%s/protac_%s_2.mol2' % (filepath_cluster, score_rank),
                                           'pdb', '%s/protac_%s_2.pdb' % (filepath_cluster, score_rank))
                 pre.alter_chain('%s/protac_%s_2.pdb' % (filepath_cluster, score_rank),
                                 '%s/protac_%s_2.pdb' % (filepath_cluster, score_rank), 'Y')
@@ -353,14 +354,14 @@ class Filtering_queue:
                 if self.lig_locate_num == 1:
                     os.system('cat rec_lig.pdb >> %s' % target_lig_pdb)
                     lig_sdf = 'lig_%s.sdf' % pdb_num
-                    pre.obabel_convert_format('pdb', target_lig_pdb, 'sdf', lig_sdf)
+                    pre.schrodinger_convert_format('pdb', target_lig_pdb, 'sdf', lig_sdf)
                     protac_sdf = 'protac_%s.sdf' % pdb_num
                     num_confor = pre.getConformers('rec_lig.sdf', 'target_lig.sdf', 'protac.smi', lig_sdf, protac_sdf)
                     #Vina and obenergy
                     if int(num_confor) > 0 :
                         #preprocess files for obenergy and vina
                         protac_mol2 = 'protac_%s.mol2' % (pdb_num)
-                        pre.obabel_convert_format('sdf', protac_sdf, 'mol2', protac_mol2)
+                        pre.schrodinger_convert_format('sdf', protac_sdf, 'mol2', protac_mol2)
                         model_nolig_pdb = 'model_nolig.%s.pdb' % (pdb_num)
                         os.system('grep ATOM receptor_H.pdb > %s' % (model_nolig_pdb))
                         os.system('grep ATOM %s >> %s' % (target_addH_pdb, model_nolig_pdb))
@@ -375,7 +376,7 @@ class Filtering_queue:
                     os.system('cat %s rec_lig_1.pdb > %s'
                               % (target_lig_pdb, target_lig_pdb_1))
                     lig_sdf_1 = '%s/lig_%s.sdf' % (self.filepath_rec_lig_1, pdb_num)
-                    pre.obabel_convert_format('pdb', target_lig_pdb_1, 'sdf', lig_sdf_1)
+                    pre.schrodinger_convert_format('pdb', target_lig_pdb_1, 'sdf', lig_sdf_1)
                     protac_sdf_1 = '%s/protac_%s.sdf' % (self.filepath_rec_lig_1, pdb_num)
                     num_confor_1 = pre.getConformers('rec_lig_1.sdf', 'target_lig.sdf', 'protac.smi',
                                                    lig_sdf_1, protac_sdf_1)
@@ -385,7 +386,7 @@ class Filtering_queue:
                     if int(num_confor_1) > 0 :
                         #preprocess files for obenergy and vina
                         protac_mol2_1 = '%s/protac_%s.mol2' % (self.filepath_rec_lig_1, pdb_num)
-                        pre.obabel_convert_format('sdf', protac_sdf_1, 'mol2', protac_mol2_1)
+                        pre.schrodinger_convert_format('sdf', protac_sdf_1, 'mol2', protac_mol2_1)
                         os.system('grep ATOM receptor_H.pdb > %s' % (model_nolig_pdb))
                         os.system('grep ATOM %s >> %s' % (target_addH_pdb, model_nolig_pdb))
                         #obenergy and vina
@@ -395,14 +396,14 @@ class Filtering_queue:
                     os.system('cat %s rec_lig_2.pdb > %s'
                               % (target_lig_pdb, target_lig_pdb_2))
                     lig_sdf_2 = '%s/lig_%s.sdf' % (self.filepath_rec_lig_2, pdb_num)
-                    pre.obabel_convert_format('pdb', target_lig_pdb_2, 'sdf', lig_sdf_2)
+                    pre.schrodinger_convert_format('pdb', target_lig_pdb_2, 'sdf', lig_sdf_2)
                     protac_sdf_2 = '%s/protac_%s.sdf' % (self.filepath_rec_lig_2, pdb_num)
                     num_confor_2 = pre.getConformers('rec_lig_2.sdf', 'target_lig.sdf', 'protac.smi',
                                                    lig_sdf_2, protac_sdf_2)
                     if int(num_confor_2) > 0 :
                         #preprocess files for obenergy and vina
                         protac_mol2_2 = '%s/protac_%s.mol2' % (self.filepath_rec_lig_2, pdb_num)
-                        pre.obabel_convert_format('sdf', protac_sdf_2, 'mol2', protac_mol2_2)
+                        pre.schrodinger_convert_format('sdf', protac_sdf_2, 'mol2', protac_mol2_2)
                         os.system('grep ATOM receptor_H.pdb > %s' % (model_nolig_pdb))
                         os.system('grep ATOM %s >> %s' % (target_addH_pdb, model_nolig_pdb))
                         #obenergy and vina

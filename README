@@ -82,3 +82,5 @@ Notes:
 2. All non-standard residues should be removed.
 
 3. All charges should be removed, and consistent with protac smiles.
+
+4. Only one chain is permitted for target and receptor complex.

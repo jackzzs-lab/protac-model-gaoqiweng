@@ -2,6 +2,7 @@
 #-*- coding: utf-8 -*-
 
 import os,re
+from pathlib2 import Path
 from string import digits
 from rdkit import Chem
 from rdkit.Chem import AllChem
@@ -12,6 +13,7 @@ ADFRSUITE = os.environ['ADFRSUITE']
 VINA = os.environ['VINA']
 VOROMQA = os.environ['VOROMQA']
 FCC= os.environ['FCC']
+SCHRODINGER = os.environ['SCHRODINGER']
 
 #Obenergy and vina
 def obenergy_vina(pdb_num, filepath_vina, filepath_out):
@@ -262,11 +264,18 @@ def split_mol2_obenergy(input_file, output_filepath, obenergy_file):
                 filter_file.write(content)
 
 #Convert the file format by openbabel
-def obabel_convert_format(iformat, file_input, oformat, file_out, addH = False):
+def schrodinger_convert_format(iformat, file_input, oformat, file_out, addH = False):
     if addH:
         os.system(ADFRSUITE + '/bin/obabel -h -i%s %s -o%s -O %s' % (iformat, file_input, oformat, file_out))
     else:
         os.system(ADFRSUITE + '/bin/obabel -i%s %s -o%s -O %s' % (iformat, file_input, oformat, file_out))
+
+def schrodinger_convert_format(iformat, file_input, oformat, file_out, addH = False):
+    if addH:
+        file_temp = Path(file_out).with_suffix(".temp.pdb")
+        os.system(SCHRODINGER + '/utilities/applyhtreat %s %s' % (file_input, file_temp))
+        file_input = file_temp
+    os.system(SCHRODINGER + '/run fix_bond_orders.py %s %s' % (file_input, file_out))
 
 #get the small molecule from PDB file
 def preprocess_pdb_element(file_input_pdb, file_output_pdb):
