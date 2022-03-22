@@ -11,7 +11,7 @@ ADFRSUITE = os.environ['ADFRSUITE']
 
 #run FRODOCK
 def frodock(site):
-    print ('FRODOCK docking')
+    print('FRODOCK docking')
     #working directory is in filepath_frodock
     frodockgrid_intel = '%s/bin/frodockgrid' % FRODOCK
     frodockgrid_gcc = '%s/bin/frodockgrid_gcc' % FRODOCK

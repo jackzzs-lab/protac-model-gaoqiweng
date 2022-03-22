@@ -3,6 +3,7 @@
 .idea
 
 data/*
+deprecated/*
 !data/example_*
 env.*.sh
 

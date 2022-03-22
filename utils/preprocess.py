@@ -53,7 +53,7 @@ def obenergy_vina(pdb_num, filepath_vina, filepath_out):
             os.system('echo \"%s %s\" >> %s/score_filter' % (pdb_num, num, filepath_vina))
             os.system('sort -k 2 -n  %s/obenergy_filter_%s | head -n 1 >> %s/score_all_top1' % (filepath_vina, pdb_num, filepath_vina))
     if filepath_out != '.':
-        os.system('mv protac_%s_*.mol2 %s' % (pdb_num, filepath_out))
+        os.system('cp protac_%s_*.mol2 %s' % (pdb_num, filepath_out))
     return num
     #os.system('rm model_nolig.%s.* protac_%s.mol2 protac_%s_* %s/score_%s %s/obenergy_process_%s %s/obenergy_%s'
     #          % (pdb_num, pdb_num, pdb_num, filepath_vina, pdb_num, filepath_vina, pdb_num, filepath_vina, pdb_num))

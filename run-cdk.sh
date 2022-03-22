@@ -1,5 +1,5 @@
 #!/bin/bash
-project=hdac
+project=cdk
 cpu_per_item=3
 
 find "./data/${project}" -mindepth 1 -maxdepth 1 -type d -print0 | while IFS= read -r -d '' item; do
@@ -19,7 +19,7 @@ __conda_init
 source "env.super.sh"
 python main.py -irec ${item}/receptor.pdb -ilig ${item}/target.pdb -site=$(head -n1 "${item}/site_info.txt") \
                -ismi ${item}/protac.smi -ie3lig1 ${item}/rec_lig_1.sdf -ie3lig2 ${item}/rec_lig_2.sdf \
-               -o ${item_result_dir} -cpu ${cpu_per_item} -refine -refineonly
+               -o ${item_result_dir} -cpu ${cpu_per_item} -refine
 echo "Finished at $(date)" >&2
 EOT
 done

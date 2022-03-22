@@ -9,9 +9,9 @@ from Queue import Queue
 ROSETTA = os.environ["ROSETTA"]
 ADFRSUITE = os.environ['ADFRSUITE']
 
-#run FRODOCK
+#run ROSETTA
 def rosetta(cpu, lig_locate_num):
-    print ('ROSETTA docking')
+    print('ROSETTA docking')
     #working directory is in filepath_rosetta
 
     #preprocess files for rosetta docking
@@ -334,8 +334,8 @@ def interface_rosetta(rec_site, lig_site, pdb, rec_chain_list, lig_chain_list):
 
 #Use the molfile_to_params.py from Rosetta
 def molfile_to_params(res_name, para_name, sdf_name):
-    os.system(ROSETTA + '/main/source/scripts/python/public/molfile_to_params.py -n %s -p %s '
-                        '--conformers-in-one-file %s --clobber' % (res_name, para_name, sdf_name))
+    os.system(ROSETTA + '/main/source/scripts/python/public/molfile_to_params.py -n %s -p %s %s --clobber' % (res_name, para_name, sdf_name))
+    os.system('mv %s_0001.pdb %s.pdb' % (para_name, para_name))
 
 #generate docking parametes for rosetta
 def generate_rosetta_para(file_out):
