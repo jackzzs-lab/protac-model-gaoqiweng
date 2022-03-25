@@ -1,6 +1,3 @@
-import os,re
-from pathlib2 import Path
-from string import digits
 from rdkit import Chem
 from rdkit.Chem import AllChem
 from rdkit.Chem import rdMolAlign
@@ -22,10 +19,6 @@ def getConformers(file_rec_lig_sdf, file_warhead_sdf, protac_smi, file_docked, f
     protac_warhead = protac.GetSubstructMatch(warhead)
     if len(docked_warhead) == 0 or len(docked_e3) == 0 or len(protac_e3) == 0 or len(protac_warhead) == 0:
         print "The smiles of PROTAC doesn't match the structures of ligands of target or receptor proteins."
-    print docked_e3
-    print docked_warhead
-    print protac_e3
-    print protac_warhead
     protac_align_id = list(protac_e3)+list(protac_warhead)
     docked_align_id = list(docked_e3)+list(docked_warhead)
     if not (len(docked_e3) == 0 or len(docked_warhead) == 0):
@@ -42,4 +35,4 @@ def getConformers(file_rec_lig_sdf, file_warhead_sdf, protac_smi, file_docked, f
     return len(rmsList)
     
 if __name__ == "__main__":
-    print(getConformers('rec_lig.sdf', 'target_lig.sdf', 'protac.smi', 'lig_1.sdf', 'protac.sdf'))
+    print(getConformers('rec_lig_1.sdf', 'target_lig.sdf', 'protac.smi', 'target_lig.1_0005.sdf', 'protacs.smi'))

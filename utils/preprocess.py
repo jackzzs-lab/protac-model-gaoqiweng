@@ -264,7 +264,7 @@ def split_mol2_obenergy(input_file, output_filepath, obenergy_file):
                 filter_file.write(content)
 
 #Convert the file format by openbabel
-def schrodinger_convert_format(iformat, file_input, oformat, file_out, addH = False):
+def obabel_convert_format(iformat, file_input, oformat, file_out, addH = False):
     if addH:
         os.system(ADFRSUITE + '/bin/obabel -h -i%s %s -o%s -O %s' % (iformat, file_input, oformat, file_out))
     else:
