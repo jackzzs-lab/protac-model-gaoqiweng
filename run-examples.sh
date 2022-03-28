@@ -14,7 +14,7 @@ sbatch <<EOT
 #SBATCH -p cpu
 #SBATCH --cpus-per-task=${cpu_per_item}
 
-echo "Started at $(date)" >&2
+echo "Started at \$(date)" >&2
 __conda_init
 source "env.super.sh"
 
@@ -26,6 +26,6 @@ elif [[ "${item_name}" == "example_2" ]]; then
                 -ismi ${item}/protac.smi -ie3lig1 ${item}/rec_lig_1.sdf -ie3lig2 ${item}/rec_lig_2.sdf \
                 -o ${item_result_dir} -cpu ${cpu_per_item} -refine
 fi
-echo "Finished at $(date)" >&2
+echo "Finished at \$(date)" >&2
 EOT
 done

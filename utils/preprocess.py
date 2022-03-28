@@ -263,19 +263,26 @@ def split_mol2_obenergy(input_file, output_filepath, obenergy_file):
             with open('%s/%s_%s.mol2' % (output_filepath, ligand_name, i), 'wb') as filter_file:
                 filter_file.write(content)
 
-#Convert the file format by openbabel
+#fix bond orders by schrodinger
+def fix_bond_orders(file_input, file_out):
+    os.system(SCHRODINGER + '/run fix_bond_orders.py %s %s > /dev/null 2>&1' % (file_input, file_out))
+
+#convert the file format by openbabel
 def obabel_convert_format(iformat, file_input, oformat, file_out, addH = False):
     if addH:
         os.system(ADFRSUITE + '/bin/obabel -h -i%s %s -o%s -O %s' % (iformat, file_input, oformat, file_out))
     else:
         os.system(ADFRSUITE + '/bin/obabel -i%s %s -o%s -O %s' % (iformat, file_input, oformat, file_out))
 
+#convert the file format and fix bond orders by schrodinger
 def schrodinger_convert_format(iformat, file_input, oformat, file_out, addH = False):
     if addH:
-        file_temp = Path(file_out).with_suffix(".temp.pdb")
-        os.system(SCHRODINGER + '/utilities/applyhtreat %s %s' % (file_input, file_temp))
-        file_input = file_temp
-    os.system(SCHRODINGER + '/run fix_bond_orders.py %s %s' % (file_input, file_out))
+        file_out = Path(file_out)
+        file_fix = file_out.with_name(file_out.stem + '_fix' + file_out.suffix)
+        fix_bond_orders(file_input, file_fix)
+        os.system(SCHRODINGER + '/utilities/applyhtreat %s %s > /dev/null 2>&1' % (file_fix, file_out))
+    else:
+        fix_bond_orders(file_input, file_out)
 
 #get the small molecule from PDB file
 def preprocess_pdb_element(file_input_pdb, file_output_pdb):
@@ -294,13 +301,12 @@ def preprocess_pdb_element(file_input_pdb, file_output_pdb):
             diff = 76 - length
             blank_length = ' ' * diff
             content += '%s%s\n' % (blank_length, element)
-    with open(file_output_pdb, 'wb') as file_output:
-        file_output.write(content)
-
-#adding hydrogens to the protein
-def addH_protein(file_input_pdb, file_output_pdb):
-    os.system(ADFRSUITE + '/bin/reduce -OH -HIS -NOADjust -NUClear %s 1> %s 2>> addH_log'
-              % (file_input_pdb, file_output_pdb))
+    file_output = Path(file_output_pdb)
+    file_nf = file_output.with_name(file_output.stem + '_nf' + file_output.suffix)
+    with open(str(file_nf), 'wb') as f:
+        f.write(content)
+    fix_bond_orders(file_nf, file_output)
+    
 
 #get the number of residues around the small molecule
 def lig_around_residue(file_input_pdb, out_site):

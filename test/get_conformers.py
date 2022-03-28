@@ -35,4 +35,4 @@ def getConformers(file_rec_lig_sdf, file_warhead_sdf, protac_smi, file_docked, f
     return len(rmsList)
     
 if __name__ == "__main__":
-    print(getConformers('rec_lig_1.sdf', 'target_lig.sdf', 'protac.smi', 'target_lig.1_0005.sdf', 'protacs.smi'))
+    print(getConformers('rec_lig_1.sdf', 'target_lig.sdf', 'protac.smi', 'target_lig.1_0017.sdf', 'protacs.smi'))

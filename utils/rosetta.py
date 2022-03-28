@@ -58,8 +58,9 @@ def rosetta(cpu, lig_locate_num):
         pre.schrodinger_convert_format('pdb', 'target_lig_pre.%s.pdb' % (new_rank),
                                   'sdf', 'target_lig_pre.%s.sdf' % (new_rank), addH=True)
         molfile_to_params('LG2', 'lig.%s' % new_rank, 'target_lig_pre.%s.sdf' % (new_rank))
-        os.system('cp %s/cluster/model.%s.pdb .' % (filepath_frodock, new_rank))
-        os.system('cat rec_lig_Y.pdb lig.%s.pdb >> model.%s.pdb' % (new_rank, new_rank))
+        os.system('cp %s/cluster/model.%s.pdb model_tmp.%s.pdb' % (filepath_frodock, new_rank, new_rank))
+        os.system('cat model_tmp.%s.pdb rec_lig_Y.pdb lig.%s.pdb | egrep "ATOM|HETATM" > model_nf.%s.pdb' % (new_rank, new_rank, new_rank))
+        pre.fix_bond_orders('model_nf.%s.pdb' % new_rank, 'model.%s.pdb' % new_rank)
 
         #rosetta docking
         if flag_mpi == 1:
@@ -162,11 +163,12 @@ def rosetta(cpu, lig_locate_num):
                                      'pdb', '%s/protac_%s.pdb' % (filepath_cluster, score_rank))
            pre.alter_chain('%s/protac_%s.pdb' % (filepath_cluster, score_rank),
                            '%s/protac_%s.pdb' % (filepath_cluster, score_rank), 'X')
-           os.system('cat %s/model.%s.pdb %s/protac_%s.pdb > %s/model_merge_%s.pdb' %
-                     (filepath_cluster, score_rank, filepath_cluster, score_rank, filepath_cluster, score_rank))
+           os.system('cat %s/model.%s.pdb %s/protac_%s.pdb | egrep "ATOM|HETATM" > %s/model_merge_%s_nf.pdb' %
+                      (filepath_cluster, score_rank, filepath_cluster, score_rank, filepath_cluster, score_rank))
+           pre.fix_bond_orders('%s/model_merge_%s_nf.pdb' % (filepath_cluster, score_rank), '%s/model_merge_%s.pdb' %(filepath_cluster, score_rank))
        else:
-           os.system('cat %s/model.%s.pdb > %s/model_merge_%s.pdb' %
-                     (filepath_cluster, score_rank, filepath_cluster, score_rank))
+           os.system('cat %s/model.%s.pdb | egrep "ATOM|HETATM" > %s/model_merge_%s_nf.pdb' %
+                      (filepath_cluster, score_rank, filepath_cluster, score_rank))
            flag = 0
            if vina_dict_1.has_key(model_pdb_id):
                protac_best_num_1 = vina_dict_1['%s' % model_pdb_id]
@@ -176,8 +178,8 @@ def rosetta(cpu, lig_locate_num):
                                          'pdb', '%s/protac_%s_1.pdb' % (filepath_cluster, score_rank))
                pre.alter_chain('%s/protac_%s_1.pdb' % (filepath_cluster, score_rank),
                                '%s/protac_%s_1.pdb' % (filepath_cluster, score_rank), 'X')
-               os.system('cat %s/protac_%s_1.pdb >> %s/model_merge_%s.pdb' %
-                         (filepath_cluster, score_rank, filepath_cluster, score_rank))
+               os.system('cat %s/protac_%s_1.pdb | egrep "ATOM|HETATM" >> %s/model_merge_%s_nf.pdb' %
+                          (filepath_cluster, score_rank, filepath_cluster, score_rank))
                flag = 1
            if vina_dict_2.has_key(model_pdb_id):
                protac_best_num_2 = vina_dict_2['%s' % model_pdb_id]
@@ -187,9 +189,10 @@ def rosetta(cpu, lig_locate_num):
                                          'pdb', '%s/protac_%s_2.pdb' % (filepath_cluster, score_rank))
                pre.alter_chain('%s/protac_%s_2.pdb' % (filepath_cluster, score_rank),
                                '%s/protac_%s_2.pdb' % (filepath_cluster, score_rank), 'Y')
-               os.system('cat %s/protac_%s_2.pdb >> %s/model_merge_%s.pdb' %
+               os.system('cat %s/protac_%s_2.pdb | egrep "ATOM|HETATM" >> %s/model_merge_%s_nf.pdb' %
                          (filepath_cluster, score_rank, filepath_cluster, score_rank))
                flag = 1
+           pre.fix_bond_orders('%s/model_merge_%s_nf.pdb' % (filepath_cluster, score_rank), '%s/model_merge_%s.pdb' %(filepath_cluster, score_rank))
            if flag == 0:
                os.system('cp %s/model_merge_%s.pdb %s/model_merge_%s.pdb'  %
                          (filepath_frodock_cluster, model_pdb_id, filepath_cluster, score_rank))
@@ -430,7 +433,7 @@ class Filtering_queue:
                               'print $0}\' model.%s.pdb > %s' % (pdb_num, target_lig_pdb))
                     target_lig_pdb_1 = '%s/%s' % (self.filepath_rec_lig_1, target_lig_pdb)
                     target_lig_sdf_1 = '%s/%s' % (self.filepath_rec_lig_1, target_lig_sdf)
-                    os.system('cat %s rec_lig_1.pdb > %s'
+                    os.system('cat %s rec_lig_1.pdb | grep HETATM > %s'
                               % (target_lig_pdb, target_lig_pdb_1))
                     pre.schrodinger_convert_format('pdb', target_lig_pdb_1, 'sdf', target_lig_sdf_1)
                     protac_sdf_1 = '%s/protac_%s.sdf' % (self.filepath_rec_lig_1, pdb_num)
@@ -450,7 +453,7 @@ class Filtering_queue:
 
                     target_lig_pdb_2 = '%s/%s' % (self.filepath_rec_lig_2, target_lig_pdb)
                     target_lig_sdf_2 = '%s/%s' % (self.filepath_rec_lig_2, target_lig_sdf)
-                    os.system('cat %s rec_lig_2.pdb > %s'
+                    os.system('cat %s rec_lig_2.pdb | grep HETATM > %s'
                               % (target_lig_pdb, target_lig_pdb_2))
                     pre.schrodinger_convert_format('pdb', target_lig_pdb_2, 'sdf', target_lig_sdf_2)
                     protac_sdf_2 = '%s/protac_%s.sdf' % (self.filepath_rec_lig_2, pdb_num)
