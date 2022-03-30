@@ -351,7 +351,6 @@ def generate_rosetta_para(file_out):
     content += '-dock_mcm_rot_magnitude 5.0\n' #refinement rotational perturbation
     content += '-ex1\n'
     content += '-ex2aro\n'
-    content += '-overwrite\n'
     with open(file_out, 'wb') as file:
         file.write(content)
 

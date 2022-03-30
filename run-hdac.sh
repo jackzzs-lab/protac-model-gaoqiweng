@@ -1,11 +1,11 @@
 #!/bin/bash
 project=hdac
-cpu_per_item=30
+cpu_per_item=3
 
 find "./data/${project}" -mindepth 1 -maxdepth 1 -type d -print0 | while IFS= read -r -d '' item; do
 item_result_dir="./data/${project}_results/$(basename "$item")"
 mkdir -p "$item_result_dir"
-cat <<EOT
+sbatch <<EOT
 #!/usr/bin/bash -l
 #SBATCH -J protac-gao-${project}-$(basename "$item")-refine
 #SBATCH -o ${item_result_dir}/%j-refine.log
