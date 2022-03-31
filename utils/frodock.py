@@ -171,7 +171,7 @@ def filter_frodock(cpu, lig_locate_num):
                                       'pdb', '%s/protac_%s.pdb' % (filepath_cluster, score_rank))
             pre.alter_chain('%s/protac_%s.pdb' % (filepath_cluster, score_rank),
                             '%s/protac_%s.pdb' % (filepath_cluster, score_rank), 'X')
-            os.system('cat %s/model.%s.pdb %s/protac_%s.pdb | egrep "ATOM|HETATM" > %s/model_merge_%s_nf.pdb' %
+            os.system('pdb_merge %s/model.%s.pdb %s/protac_%s.pdb | pdb_tidy > %s/model_merge_%s_nf.pdb' %
                       (filepath_cluster, score_rank, filepath_cluster, score_rank, filepath_cluster, score_rank))
             pre.fix_bond_orders('%s/model_merge_%s_nf.pdb' % (filepath_cluster, score_rank), '%s/model_merge_%s.pdb' %(filepath_cluster, score_rank))
         else:
@@ -197,7 +197,9 @@ def filter_frodock(cpu, lig_locate_num):
                                 '%s/protac_%s_2.pdb' % (filepath_cluster, score_rank), 'Y')
                 os.system('cat %s/protac_%s_2.pdb | egrep "ATOM|HETATM" >> %s/model_merge_%s_nf.pdb' %
                           (filepath_cluster, score_rank, filepath_cluster, score_rank))
-            pre.fix_bond_orders('%s/model_merge_%s_nf.pdb' % (filepath_cluster, score_rank), '%s/model_merge_%s.pdb' %(filepath_cluster, score_rank))
+            os.system('pdb_reatom %s/model_merge_%s_nf.pdb | pdb_tidy > %s/model_merge_%s_ra.pdb' %
+                          (filepath_cluster, score_rank, filepath_cluster, score_rank))
+            pre.fix_bond_orders('%s/model_merge_%s_ra.pdb' % (filepath_cluster, score_rank), '%s/model_merge_%s.pdb' %(filepath_cluster, score_rank))
 
     with open('%s/pdb_model.list' % filepath_cluster, 'wb') as file_out:
         file_out.write(pdb_model)
@@ -355,12 +357,13 @@ class Filtering_queue:
             #get the PROTAC conformations
             if filter_num != 'none':
                 target_lig_pdb = 'target_lig_%s.pdb' % pdb_num
+                combined_lig_pdb = 'combined_lig_%s.pdb' % pdb_num
                 pre.preprocess_pdb_element(target_addH_pdb, target_lig_pdb)
                 # The ligand with only one location for linker
                 if self.lig_locate_num == 1:
-                    os.system('cat rec_lig.pdb >> %s' % target_lig_pdb)
+                    os.system('pdb_merge %s rec_lig.pdb | pdb_reatom | pdb_tidy > %s' % (target_lig_pdb, combined_lig_pdb))
                     lig_sdf = 'lig_%s.sdf' % pdb_num
-                    pre.schrodinger_convert_format('pdb', target_lig_pdb, 'sdf', lig_sdf)
+                    pre.schrodinger_convert_format('pdb', combined_lig_pdb, 'sdf', lig_sdf)
                     protac_sdf = 'protac_%s.sdf' % pdb_num
                     num_confor = pre.getConformers('rec_lig.sdf', 'target_lig.sdf', 'protac.smi', lig_sdf, protac_sdf)
                     #Vina and obenergy
@@ -379,8 +382,7 @@ class Filtering_queue:
                 #The ligand with two possible location for linker
                 else:
                     target_lig_pdb_1 = '%s/%s' % (self.filepath_rec_lig_1, target_lig_pdb)
-                    os.system('cat %s rec_lig_1.pdb | grep HETATM > %s'
-                              % (target_lig_pdb, target_lig_pdb_1))
+                    os.system('pdb_merge %s rec_lig_1.pdb | pdb_reatom | pdb_tidy > %s' % (target_lig_pdb, target_lig_pdb_1))
                     lig_sdf_1 = '%s/lig_%s.sdf' % (self.filepath_rec_lig_1, pdb_num)
                     pre.schrodinger_convert_format('pdb', target_lig_pdb_1, 'sdf', lig_sdf_1)
                     protac_sdf_1 = '%s/protac_%s.sdf' % (self.filepath_rec_lig_1, pdb_num)
@@ -399,8 +401,7 @@ class Filtering_queue:
                         num_obenergy_vina_1 = pre.obenergy_vina(pdb_num, self.filepath_vina_1, self.filepath_rec_lig_1)
 
                     target_lig_pdb_2 = '%s/%s' % (self.filepath_rec_lig_2, target_lig_pdb)
-                    os.system('cat %s rec_lig_2.pdb | grep HETATM > %s'
-                              % (target_lig_pdb, target_lig_pdb_2))
+                    os.system('pdb_merge %s rec_lig_2.pdb | pdb_reatom | pdb_tidy  > %s' % (target_lig_pdb, target_lig_pdb_2))
                     lig_sdf_2 = '%s/lig_%s.sdf' % (self.filepath_rec_lig_2, pdb_num)
                     pre.schrodinger_convert_format('pdb', target_lig_pdb_2, 'sdf', lig_sdf_2)
                     protac_sdf_2 = '%s/protac_%s.sdf' % (self.filepath_rec_lig_2, pdb_num)

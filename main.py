@@ -42,6 +42,8 @@ def parse_args():
                              'But it will cost much more time.', action="store_true", default=False)
     parser.add_argument('-refineonly', '--rosettadock-refinement-only',
                         help='Run refinement when frodock results have been generated', action="store_true", default=False)
+    parser.add_argument('-sf', '--skip-frodock',
+                        help='Do not run frodock', action="store_true", default=False)
     return parser.parse_args()
 
 def main():
@@ -58,6 +60,7 @@ def main():
     filepath_e3sdf_2 = args.input_e3_ligand_sdf2
     refine = args.rosettadock_refinement
     refineonly = args.rosettadock_refinement_only
+    skip_frodock = args.skip_frodock
     lig_locate_num = 1
     filepath_frodock = filepath_out + '/frodock'
     if os.path.exists(filepath_out) == False:
@@ -76,7 +79,8 @@ def main():
 
     #FRODOCK docking
     if not (refine and refineonly):
-        fro.frodock(site)
+        if not skip_frodock:
+            fro.frodock(site)
         fro.filter_frodock(cpu, lig_locate_num)
 
     #Rosetta docking

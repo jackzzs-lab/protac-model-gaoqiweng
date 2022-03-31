@@ -265,7 +265,7 @@ def split_mol2_obenergy(input_file, output_filepath, obenergy_file):
 
 #fix bond orders by schrodinger
 def fix_bond_orders(file_input, file_out):
-    os.system(SCHRODINGER + '/run fix_bond_orders.py %s %s > /dev/null 2>&1' % (file_input, file_out))
+    os.system(SCHRODINGER + '/run fix_bond_orders.py %s %s > /dev/null' % (file_input, file_out))
 
 #convert the file format by openbabel
 def obabel_convert_format(iformat, file_input, oformat, file_out, addH = False):
@@ -280,7 +280,7 @@ def schrodinger_convert_format(iformat, file_input, oformat, file_out, addH = Fa
         file_out = Path(file_out)
         file_fix = file_out.with_name(file_out.stem + '_fix' + file_out.suffix)
         fix_bond_orders(file_input, file_fix)
-        os.system(SCHRODINGER + '/utilities/applyhtreat %s %s > /dev/null 2>&1' % (file_fix, file_out))
+        os.system(SCHRODINGER + '/utilities/applyhtreat %s %s > /dev/null' % (file_fix, file_out))
     else:
         fix_bond_orders(file_input, file_out)
 
