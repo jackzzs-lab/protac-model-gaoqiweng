@@ -84,3 +84,7 @@ Notes:
 3. All charges should be removed, and consistent with protac smiles.
 
 4. Only one chain is permitted for target and receptor complex.
+
+5. All alternative positions should be removed.
+
+6. If there is some heterocyclic structures in the pdb, they should be replaced with a similar alkyl ring and superimposed back after ternary modeling.

@@ -14,6 +14,7 @@ VINA = os.environ['VINA']
 VOROMQA = os.environ['VOROMQA']
 FCC= os.environ['FCC']
 SCHRODINGER = os.environ['SCHRODINGER']
+MERGER = os.environ['MERGER']
 
 #Obenergy and vina
 def obenergy_vina(pdb_num, filepath_vina, filepath_out):
@@ -267,6 +268,9 @@ def split_mol2_obenergy(input_file, output_filepath, obenergy_file):
 def fix_bond_orders(file_input, file_out):
     os.system(SCHRODINGER + '/run fix_bond_orders.py %s %s > /dev/null' % (file_input, file_out))
 
+def structcat(*files):
+    os.system(SCHRODINGER + '/run %s -o %s %s' % (MERGER, files[-1], ' '.join(files[:-1])))
+
 #convert the file format by openbabel
 def obabel_convert_format(iformat, file_input, oformat, file_out, addH = False):
     if addH:
@@ -277,12 +281,9 @@ def obabel_convert_format(iformat, file_input, oformat, file_out, addH = False):
 #convert the file format and fix bond orders by schrodinger
 def schrodinger_convert_format(iformat, file_input, oformat, file_out, addH = False):
     if addH:
-        file_out = Path(file_out)
-        file_fix = file_out.with_name(file_out.stem + '_fix' + file_out.suffix)
-        fix_bond_orders(file_input, file_fix)
-        os.system(SCHRODINGER + '/utilities/applyhtreat %s %s > /dev/null' % (file_fix, file_out))
+        os.system(SCHRODINGER + '/utilities/applyhtreat %s %s > /dev/null' % (file_input, file_out))
     else:
-        fix_bond_orders(file_input, file_out)
+        os.system(SCHRODINGER + '/utilities/structconvert %s %s > /dev/null' % (file_input, file_out))
 
 #get the small molecule from PDB file
 def preprocess_pdb_element(file_input_pdb, file_output_pdb):
@@ -401,7 +402,7 @@ def getConformers(file_rec_lig_sdf, file_warhead_sdf, protac_smi, file_docked, f
         if not (len(docked_e3) == 0 or len(docked_warhead) == 0):
             cmap = {protac_e3[j]: docked_head.GetConformer().GetAtomPosition(docked_e3[j]) for j in range(len(docked_e3))}
             cmap.update({protac_warhead[j]: docked_head.GetConformer().GetAtomPosition(docked_warhead[j]) for j in range(len(docked_warhead))})
-            cids = AllChem.EmbedMultipleConfs(protac, numConfs=100, coordMap=cmap, maxAttempts=1000, numThreads=1)
+            cids = AllChem.EmbedMultipleConfs(protac, numConfs=100, coordMap=cmap, maxAttempts=1000, numThreads=1, ignoreSmoothingFailures=True)
             if len(cids) > 0:
                 writer = Chem.SDWriter(file_out)
                 for i in range(len(cids)):

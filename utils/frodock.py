@@ -87,14 +87,8 @@ def filter_frodock(cpu, lig_locate_num):
     pre.schrodinger_convert_format('pdb', 'target_lig.pdb', 'sdf', 'target_lig.sdf')
     pre.schrodinger_convert_format('pdb', 'target_lig.pdb', 'sdf', 'target_lig_H.sdf', addH=True)
     pre.schrodinger_convert_format('sdf', 'target_lig_H.sdf', 'pdb', 'target_lig_H.pdb')
-    os.system(ADFRSUITE + '/bin/reduce -OH -HIS -NOADjust -NUClear receptor.pdb'
-                       ' | grep ATOM 1> receptor_H_nf.pdb 2>> addH_log')
-    os.system(ADFRSUITE + '/bin/reduce -OH -HIS -NOADjust -NUClear target.pdb'
-                       ' | grep ATOM 1> target_H_nf.pdb 2>> addH_log')
-    os.system('grep HETATM rec_lig_H.pdb >> receptor_H_nf.pdb')
-    os.system('grep HETATM target_lig_H.pdb >> target_H_nf.pdb')
-    pre.fix_bond_orders('receptor_H_nf.pdb', 'receptor_H.pdb')
-    pre.fix_bond_orders('target_H_nf.pdb', 'target_H.pdb')
+    os.system(ADFRSUITE + '/bin/reduce -OH -HIS -NOADjust -NUClear receptor.pdb 1> receptor_H.pdb 2>> addH_log')
+    os.system(ADFRSUITE + '/bin/reduce -OH -HIS -NOADjust -NUClear target.pdb 1> target_H.pdb 2>> addH_log')
     rec_site = pre.lig_around_residue('receptor_H.pdb', 'rec_site')
     lig_site = pre.lig_around_residue('target_H.pdb', 'lig_site')
     rec_site_info_list = get_rec_site_info(rec_site, 'receptor_H.pdb')
@@ -171,12 +165,8 @@ def filter_frodock(cpu, lig_locate_num):
                                       'pdb', '%s/protac_%s.pdb' % (filepath_cluster, score_rank))
             pre.alter_chain('%s/protac_%s.pdb' % (filepath_cluster, score_rank),
                             '%s/protac_%s.pdb' % (filepath_cluster, score_rank), 'X')
-            os.system('pdb_merge %s/model.%s.pdb %s/protac_%s.pdb | pdb_tidy > %s/model_merge_%s_nf.pdb' %
-                      (filepath_cluster, score_rank, filepath_cluster, score_rank, filepath_cluster, score_rank))
-            pre.fix_bond_orders('%s/model_merge_%s_nf.pdb' % (filepath_cluster, score_rank), '%s/model_merge_%s.pdb' %(filepath_cluster, score_rank))
+            pre.structcat('%s/model.%s.pdb' % (filepath_cluster, score_rank), '%s/protac_%s.pdb' % (filepath_cluster, score_rank), '%s/model_merge_%s.pdb' % (filepath_cluster, score_rank))
         else:
-            os.system('cat %s/model.%s.pdb | egrep "ATOM|HETATM" > %s/model_merge_%s_nf.pdb' %
-                      (filepath_cluster, score_rank, filepath_cluster, score_rank))
             if vina_dict_1.has_key(model_nolig_pdb_id):
                 protac_best_num_1 = vina_dict_1['%s' % model_nolig_pdb_id]
                 protac_best_mol2_1 = '%s/protac_%s_%s.mol2' % (filepath_rec_lig_1, model_nolig_pdb_id, protac_best_num_1)
@@ -185,8 +175,7 @@ def filter_frodock(cpu, lig_locate_num):
                                           'pdb', '%s/protac_%s_1.pdb' % (filepath_cluster, score_rank))
                 pre.alter_chain('%s/protac_%s_1.pdb' % (filepath_cluster, score_rank),
                                 '%s/protac_%s_1.pdb' % (filepath_cluster, score_rank), 'X')
-                os.system('cat %s/protac_%s_1.pdb | egrep "ATOM|HETATM" >> %s/model_merge_%s_nf.pdb' %
-                          (filepath_cluster, score_rank, filepath_cluster, score_rank))
+                pre.structcat('%s/model.%s.pdb' % (filepath_cluster, score_rank), '%s/protac_%s_1.pdb' % (filepath_cluster, score_rank), '%s/model_merge_%s.pdb' % (filepath_cluster, score_rank))
             if vina_dict_2.has_key(model_nolig_pdb_id):
                 protac_best_num_2 = vina_dict_2['%s' % model_nolig_pdb_id]
                 protac_best_mol2_2 = '%s/protac_%s_%s.mol2' % (filepath_rec_lig_2, model_nolig_pdb_id, protac_best_num_2)
@@ -195,11 +184,7 @@ def filter_frodock(cpu, lig_locate_num):
                                           'pdb', '%s/protac_%s_2.pdb' % (filepath_cluster, score_rank))
                 pre.alter_chain('%s/protac_%s_2.pdb' % (filepath_cluster, score_rank),
                                 '%s/protac_%s_2.pdb' % (filepath_cluster, score_rank), 'Y')
-                os.system('cat %s/protac_%s_2.pdb | egrep "ATOM|HETATM" >> %s/model_merge_%s_nf.pdb' %
-                          (filepath_cluster, score_rank, filepath_cluster, score_rank))
-            os.system('pdb_reatom %s/model_merge_%s_nf.pdb | pdb_tidy > %s/model_merge_%s_ra.pdb' %
-                          (filepath_cluster, score_rank, filepath_cluster, score_rank))
-            pre.fix_bond_orders('%s/model_merge_%s_ra.pdb' % (filepath_cluster, score_rank), '%s/model_merge_%s.pdb' %(filepath_cluster, score_rank))
+                pre.structcat('%s/model.%s.pdb' % (filepath_cluster, score_rank), '%s/protac_%s_2.pdb' % (filepath_cluster, score_rank), '%s/model_merge_%s.pdb' % (filepath_cluster, score_rank))
 
     with open('%s/pdb_model.list' % filepath_cluster, 'wb') as file_out:
         file_out.write(pdb_model)
@@ -361,7 +346,7 @@ class Filtering_queue:
                 pre.preprocess_pdb_element(target_addH_pdb, target_lig_pdb)
                 # The ligand with only one location for linker
                 if self.lig_locate_num == 1:
-                    os.system('pdb_merge %s rec_lig.pdb | pdb_reatom | pdb_tidy > %s' % (target_lig_pdb, combined_lig_pdb))
+                    pre.structcat(target_lig_pdb, 'rec_lig.pdb', combined_lig_pdb)
                     lig_sdf = 'lig_%s.sdf' % pdb_num
                     pre.schrodinger_convert_format('pdb', combined_lig_pdb, 'sdf', lig_sdf)
                     protac_sdf = 'protac_%s.sdf' % pdb_num
@@ -382,7 +367,7 @@ class Filtering_queue:
                 #The ligand with two possible location for linker
                 else:
                     target_lig_pdb_1 = '%s/%s' % (self.filepath_rec_lig_1, target_lig_pdb)
-                    os.system('pdb_merge %s rec_lig_1.pdb | pdb_reatom | pdb_tidy > %s' % (target_lig_pdb, target_lig_pdb_1))
+                    pre.structcat(target_lig_pdb, 'rec_lig_1.pdb', target_lig_pdb_1)
                     lig_sdf_1 = '%s/lig_%s.sdf' % (self.filepath_rec_lig_1, pdb_num)
                     pre.schrodinger_convert_format('pdb', target_lig_pdb_1, 'sdf', lig_sdf_1)
                     protac_sdf_1 = '%s/protac_%s.sdf' % (self.filepath_rec_lig_1, pdb_num)
@@ -401,7 +386,7 @@ class Filtering_queue:
                         num_obenergy_vina_1 = pre.obenergy_vina(pdb_num, self.filepath_vina_1, self.filepath_rec_lig_1)
 
                     target_lig_pdb_2 = '%s/%s' % (self.filepath_rec_lig_2, target_lig_pdb)
-                    os.system('pdb_merge %s rec_lig_2.pdb | pdb_reatom | pdb_tidy  > %s' % (target_lig_pdb, target_lig_pdb_2))
+                    pre.structcat(target_lig_pdb, 'rec_lig_2.pdb', target_lig_pdb_2)
                     lig_sdf_2 = '%s/lig_%s.sdf' % (self.filepath_rec_lig_2, pdb_num)
                     pre.schrodinger_convert_format('pdb', target_lig_pdb_2, 'sdf', lig_sdf_2)
                     protac_sdf_2 = '%s/protac_%s.sdf' % (self.filepath_rec_lig_2, pdb_num)

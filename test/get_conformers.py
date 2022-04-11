@@ -18,13 +18,16 @@ def getConformers(file_rec_lig_sdf, file_warhead_sdf, protac_smi, file_docked, f
     protac_e3 = protac.GetSubstructMatch(e3_ligand)
     protac_warhead = protac.GetSubstructMatch(warhead)
     if len(docked_warhead) == 0 or len(docked_e3) == 0 or len(protac_e3) == 0 or len(protac_warhead) == 0:
-        print "The smiles of PROTAC doesn't match the structures of ligands of target or receptor proteins."
+        print("The smiles of PROTAC doesn't match the structures of ligands of target or receptor proteins.")
     protac_align_id = list(protac_e3)+list(protac_warhead)
     docked_align_id = list(docked_e3)+list(docked_warhead)
     if not (len(docked_e3) == 0 or len(docked_warhead) == 0):
-        cmap = {protac_e3[j]: docked_head.GetConformer().GetAtomPosition(docked_e3[j]) for j in range(len(docked_e3))}
-        cmap.update({protac_warhead[j]: docked_head.GetConformer().GetAtomPosition(docked_warhead[j]) for j in range(len(docked_warhead))})
-        cids = AllChem.EmbedMultipleConfs(protac, numConfs=100, coordMap=cmap, maxAttempts=1000, numThreads=1)
+        docked_pos = {protac_e3[j]: docked_head.GetConformer().GetAtomPosition(docked_e3[j]) for j in range(len(docked_e3))}
+        warhead_pos = {protac_warhead[j]: docked_head.GetConformer().GetAtomPosition(docked_warhead[j]) for j in range(len(docked_warhead))}
+        cmap = {}
+        cmap.update(docked_pos)
+        cmap.update(warhead_pos)
+        cids = AllChem.EmbedMultipleConfs(protac, numConfs=100, coordMap=cmap, maxAttempts=10000, numThreads=1, ignoreSmoothingFailures=True)
         if len(cids) > 0:
             writer = Chem.SDWriter(file_out)
             for i in range(len(cids)):
@@ -35,4 +38,4 @@ def getConformers(file_rec_lig_sdf, file_warhead_sdf, protac_smi, file_docked, f
     return len(rmsList)
     
 if __name__ == "__main__":
-    print(getConformers('rec_lig_1.sdf', 'target_lig.sdf', 'protac.smi', 'lig_3.sdf', 'protacs.sdf'))
+    print(getConformers('rec_lig.sdf', 'target_lig.sdf', 'protac.smi', 'lig_1002.sdf', 'protacs.sdf'))
