@@ -27,7 +27,7 @@ def getConformers(file_rec_lig_sdf, file_warhead_sdf, protac_smi, file_docked, f
         cmap = {}
         cmap.update(docked_pos)
         cmap.update(warhead_pos)
-        cids = AllChem.EmbedMultipleConfs(protac, numConfs=100, coordMap=cmap, maxAttempts=10000, numThreads=1, ignoreSmoothingFailures=True)
+        cids = AllChem.EmbedMultipleConfs(protac, numConfs=100, coordMap=cmap, maxAttempts=1000, numThreads=1, ignoreSmoothingFailures=True)
         if len(cids) > 0:
             writer = Chem.SDWriter(file_out)
             for i in range(len(cids)):
@@ -38,4 +38,4 @@ def getConformers(file_rec_lig_sdf, file_warhead_sdf, protac_smi, file_docked, f
     return len(rmsList)
     
 if __name__ == "__main__":
-    print(getConformers('rec_lig.sdf', 'target_lig.sdf', 'protac.smi', 'lig_1002.sdf', 'protacs.sdf'))
+    print(getConformers('rec_lig.sdf', 'target_lig.sdf', 'protac.smi', 'target_lig.1_0359.sdf', 'protacs.sdf'))

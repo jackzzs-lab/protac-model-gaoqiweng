@@ -1,7 +1,8 @@
 #!/bin/bash
 project=crystal
 
-find "./data/${project}" -mindepth 1 -maxdepth 1 -type d -not -name 'raw' -print0 | while IFS= read -r -d '' item; do
+for item in "./data/crystal/6HAX"; do
+#find "./data/${project}" -mindepth 1 -maxdepth 1 -type d -not -name 'raw' -print0 | while IFS= read -r -d '' item; do
     item_result_dir="./data/${project}_results/$(basename "$item")"
     mkdir -p "$item_result_dir"
     if [ -d "${item_result_dir}/frodock_results" ]; then
@@ -19,7 +20,7 @@ echo "Started at \$(date)" >&2
 __conda_init
 source "env.super.sh"
 python main.py -irec ${item}/receptor.pdb -ilig ${item}/target.pdb -site=$(head -n1 "${item}/site_info.txt") \
-               -ismi ${item}/protac.smi -o ${item_result_dir} -cpu 16 -refine -refineonly
+               -ismi ${item}/protac.smi -o ${item_result_dir} -cpu 9 -refine -refineonly
 echo "Finished at \$(date)" >&2
 EOT
         fi

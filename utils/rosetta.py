@@ -398,9 +398,11 @@ class Filtering_queue:
                 # The ligand with only one location for linker
                 if self.lig_locate_num == 1:
                     target_lig_pdb = 'target_lig.%s.pdb' % pdb_num
+                    target_lig_pdb_fix = 'target_lig.%s.fix.pdb' % pdb_num
                     target_lig_sdf = 'target_lig.%s.sdf' % pdb_num
                     os.system('grep HETATM model.%s.pdb > %s' % (pdb_num, target_lig_pdb))
-                    pre.schrodinger_convert_format('pdb', target_lig_pdb, 'sdf', target_lig_sdf)
+                    pre.fix_bond_orders(target_lig_pdb, target_lig_pdb_fix)
+                    pre.schrodinger_convert_format('pdb', target_lig_pdb_fix, 'sdf', target_lig_sdf)
                     protac_sdf = 'protac_%s.sdf' % pdb_num
                     num_confor = pre.getConformers('rec_lig.sdf', 'target_lig.sdf', 'protac.smi',
                                                    target_lig_sdf, protac_sdf)
