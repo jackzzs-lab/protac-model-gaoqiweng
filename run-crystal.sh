@@ -21,7 +21,7 @@ echo "Started at \$(date)" >&2
 __conda_init
 source "env.super.sh"
 python main.py -irec ${item}/receptor.pdb -ilig ${item}/target.pdb -site=$(head -n1 "${item}/site_info.txt") \
-               -ismi ${item}/protac.smi -o ${item_result_dir} -cpu 9 -refine
+               -ismi ${item}/protac.smi -o ${item_result_dir} -cpu 9
 echo "Finished at \$(date)" >&2
 EOT
     fi
