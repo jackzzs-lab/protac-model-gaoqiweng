@@ -2,7 +2,7 @@ module load intel rosetta/3.13 autodock-vina/1.1.2 adfrsuite voronota fcc frodoc
 while [ "$CONDA_SHLVL" -ne 0 ]; do
     conda deactivate
 done
-conda activate app-protac-model-gaoqiweng
+conda activate main2
 export ROSETTA="/opt/rosetta/3.13"
 export ADFRSUITE="${ADFRSUITE_HOME}"
 export FRODOCK="${FRODOCK_HOME}"

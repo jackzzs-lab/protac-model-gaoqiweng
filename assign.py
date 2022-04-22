@@ -1,4 +1,4 @@
-from pathlib import Path
+from pathlib2 import Path
 import shutil
 
 if __name__ == "__main__":
