@@ -6,9 +6,9 @@ if __name__ == "__main__":
     with open("protacs.smi", "r") as f:
         for line in f.readlines():
             ligand_dir = Path(line.split()[1])
-            shutil.rmtree(ligand_dir, ignore_errors=True)
+            shutil.rmtree(str(ligand_dir), ignore_errors=True)
             ligand_dir.mkdir()
-            with open(ligand_dir / 'protac.smi', "w+") as f:
+            with open(str(ligand_dir / 'protac.smi'), "w+") as f:
                 f.write(line.split()[0])
             for pdb in Path.cwd().glob('*.pdb'):
                 if ligand_dir.name.startswith(pdb.stem):

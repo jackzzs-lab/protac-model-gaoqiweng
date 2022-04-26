@@ -1,15 +1,14 @@
 #!/bin/bash
 
 help_msg() {
-    echo "Usage: $(basename "$0") [-c] [-p <project>] [-r/-ro/-nf] [items]" >&2
-    echo "       -c/--cpu: cpu to use, default=6." >&2
-    echo "       -cs/--cpu-submit: cpu to submit, default=cpu+2." >&2
+    echo "Usage: $(basename "$0") [-c <cpus>] [-cr <cpus>] [-p <project>] [-r/-ro/-nf] [items]" >&2
+    echo "       -c/--cpu: cpu to allocate when submitting, default=6." >&2
+    echo "       -cr/--cpu-run: cpu to use when running, default=cpu+2." >&2
     echo "       -d/--dry: dry run only, run cat instead of sbatch." >&2
     echo "       -p/--project: project path containing multiple items." >&2
     echo "       -r/--refine: run rosetta phase." >&2
     echo "       -ro/--refine-only: skip frodock and frodock-clustering phase." >&2
     echo "       -nf/--skip-frodock: skip frodock phase." >&2
-    echo "       -ro/--project: project path containing multiple items." >&2
     echo "Note:  the protocol can run frodock->frodock-clustering->rosetta," >&2
     echo "       by default only frodock->frodock-clustering will be run." >&2
 }
@@ -24,7 +23,7 @@ while [[ $# -gt 0 ]]; do
         shift # past value
         ;;
     -cs | --cpu-submit)
-        CPUS_SUBMIT="$2"
+        CPUS_RUN="$2"
         shift # past argument
         shift # past value
         ;;
@@ -74,7 +73,7 @@ set -- "${ITEMS[@]}" # restore positional parameters
 
 [ -n "$DRY" ] && cmd="cat" || cmd="sbatch"
 [ -z "$CPUS" ] && CPUS=6
-[ -z "$CPUS_SUBMIT" ] && CPUS_SUBMIT="$((CPUS + 2))"
+[ -z "$CPUS_RUN" ] && CPUS_RUN="$((CPUS + 2))"
 if [ -d "$PROJECT" ]; then
     while IFS= read -r -d '' item; do
         ITEMS+=("$item")
@@ -107,13 +106,13 @@ for item in "${ITEMS[@]}"; do
 #SBATCH -e ${item_result_dir}/%j.log
 #SBATCH -N 1
 #SBATCH -p cpu
-#SBATCH --cpus-per-task=${CPUS_SUBMIT}
+#SBATCH --cpus-per-task=${CPUS}
 
 echo "Started at \$(date)" >&2
 __conda_init
 source "env.super.sh"
 python main.py -irec ${item}/receptor.pdb -ilig ${item}/target.pdb -site=$(head -n1 "${item}/site_info.txt") \
--ismi ${item}/protac.smi -o ${item_result_dir} -cpu ${CPUS} $(IFS=' ' ;echo "${PARAMS[*]}") \
+-ismi ${item}/protac.smi -o ${item_result_dir} -cpu ${CPUS_RUN} $(IFS=' ' ;echo "${PARAMS[*]}") \
 &>>"${item_result_dir}/\${SLURM_JOB_ID}.log"
 echo "Finished at \$(date)" >&2
 EOT
