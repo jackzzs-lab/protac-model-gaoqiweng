@@ -37,13 +37,13 @@ while [[ $# -gt 0 ]]; do
         shift # past value
         ;;
     -nf | --skip-frodock)
-        FRODOCK_REQ="YES"
-        FRODOCK_SKIP="NO"
         PARAMS+=("--skip-frodock")
         shift # past argument
         ;;
     -ro | --refine-only)
+        FRODOCK_SKIP="NO"
         FRODOCK_REQ="YES"
+        ROSETTA_SKIP="YES"
         PARAMS+=("--rosettadock-refinement-only")
         shift # past argument
         ;;

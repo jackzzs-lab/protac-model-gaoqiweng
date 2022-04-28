@@ -1,6 +1,13 @@
 from rdkit import Chem
-from rdkit.Chem import AllChem
-from rdkit.Chem import rdMolAlign
+from rdkit.Chem import AllChem, rdMolAlign
+from rdkit.Chem.rdchem import BondType
+
+def bond_insensitive(mol):
+    molrw = Chem.RWMol(mol)
+    Chem.Kekulize(molrw, clearAromaticFlags=True)
+    for b in molrw.GetBonds():
+        b.SetBondType(BondType.SINGLE)
+    return molrw
 
 def getConformers(file_rec_lig_sdf, file_warhead_sdf, protac_smi, file_docked, file_out):
     rmsList = []
@@ -13,10 +20,14 @@ def getConformers(file_rec_lig_sdf, file_warhead_sdf, protac_smi, file_docked, f
     protac = Chem.MolFromSmiles(protac_smi)
     Chem.AddHs(protac)
     Chem.AddHs(docked_head)
-    docked_e3 = docked_head.GetSubstructMatch(e3_ligand)
-    docked_warhead = docked_head.GetSubstructMatch(warhead)
-    protac_e3 = protac.GetSubstructMatch(e3_ligand)
-    protac_warhead = protac.GetSubstructMatch(warhead)
+    docked_head_bi = bond_insensitive(docked_head)
+    protac_bi = bond_insensitive(protac)
+    e3_ligand_bi = bond_insensitive(e3_ligand)
+    warhead_bi = bond_insensitive(warhead)
+    docked_e3 = docked_head_bi.GetSubstructMatch(e3_ligand_bi)
+    docked_warhead = docked_head_bi.GetSubstructMatch(warhead_bi)
+    protac_e3 = protac_bi.GetSubstructMatch(e3_ligand_bi)
+    protac_warhead = protac_bi.GetSubstructMatch(warhead_bi)
     if len(docked_warhead) == 0 or len(docked_e3) == 0 or len(protac_e3) == 0 or len(protac_warhead) == 0:
         print("The smiles of PROTAC doesn't match the structures of ligands of target or receptor proteins.")
     protac_align_id = list(protac_e3)+list(protac_warhead)
@@ -38,4 +49,4 @@ def getConformers(file_rec_lig_sdf, file_warhead_sdf, protac_smi, file_docked, f
     return len(rmsList)
     
 if __name__ == "__main__":
-    print(getConformers('rec_lig.sdf', 'target_lig.sdf', 'protac.smi', 'target_lig.1_0359.sdf', 'protacs.sdf'))
+    print(getConformers('rec_lig.sdf', 'target_lig.sdf', 'protac.smi', 'lig_1.sdf', 'protacs.sdf'))
